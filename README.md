@@ -298,3 +298,37 @@ BrowserFS is a component of the [Doppio](http://doppiojvm.org/) and [Browsix](ht
 ### License
 
 BrowserFS is licensed under the MIT License. See `LICENSE` for details.
+
+add by hao
+```javascript
+fetch('mydata.zip').then(function(response) {
+  return response.arrayBuffer();
+}).then(function(zipData) {
+  var Buffer = BrowserFS.BFSRequire('buffer').Buffer;
+
+  BrowserFS.configure({
+    fs: "MountableFileSystem",
+    options: {
+      "/zip": {
+        fs: "ZipFS",
+        options: {
+          // Wrap as Buffer object.
+          zipData: Buffer.from(zipData)
+        }
+      },
+      "/tmp": { fs: "InMemory" },
+      "/home": { fs: "IndexedDB",
+        options: {
+           storeName : "mydata"
+        }
+      }
+    }
+  }, function(e) {
+    if (e) {
+      // An error occurred.
+      throw e;
+    }
+    // Otherwise, BrowserFS is ready to use!
+  });
+});
+```

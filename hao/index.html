@@ -1,0 +1,59 @@
+<script type="text/javascript" src="../build/browserfs.min.js"></script>
+<script type="text/javascript">
+  console.log("browserfs---->");
+  // Installs globals onto window:
+  // * Buffer
+  // * require (monkey-patches if already defined)
+  // * process
+  // You can pass in an arbitrary object if you do not wish to pollute
+  // the global namespace.
+  BrowserFS.install(window);
+  // Configures BrowserFS to use the LocalStorage file system.
+  BrowserFS.configure({
+    fs: "LocalStorage"
+  }, function(e) {
+    if (e) {
+      // An error happened!
+      throw e;
+    }
+    // Otherwise, BrowserFS is ready-to-use!
+  });
+//-----test rw
+//var fs = require('fs');
+//fs.writeFile('/test.txt', 'Cool, I can do this in the browser!', function(err) {
+//  fs.readFile('/test.txt', function(err, contents) {
+//    console.log(contents.toString());
+//  });
+//});
+//--test zip
+fetch('mydata.zip').then(function(response) {
+  return response.arrayBuffer();
+}).then(function(zipData) {
+  var Buffer = BrowserFS.BFSRequire('buffer').Buffer;
+
+  BrowserFS.configure({
+    fs: "MountableFileSystem",
+    options: {
+      "/zip": {
+        fs: "ZipFS",
+        options: {
+          // Wrap as Buffer object.
+          zipData: Buffer.from(zipData)
+        }
+      },
+      "/tmp": { fs: "InMemory" },
+      "/home": { fs: "IndexedDB",
+        options: {
+           storeName : "mydata"
+        }
+      }
+    }
+  }, function(e) {
+    if (e) {
+      // An error occurred.
+      throw e;
+    }
+    // Otherwise, BrowserFS is ready to use!
+  });
+});
+</script>
